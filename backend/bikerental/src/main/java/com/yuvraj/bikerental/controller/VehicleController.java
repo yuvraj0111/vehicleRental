@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import jakarta.persistence.criteria.Predicate;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,88 +35,100 @@ public class VehicleController {
     private final UserRepository userRepository;
 
     @GetMapping("/search")
-public List<Vehicle> search(
-        @RequestParam String city,
-        @RequestParam(required = false) FuelType fuelType,
-        @RequestParam(required = false) Double minPrice,
-        @RequestParam(required = false) Double maxPrice,
-        @RequestParam(required = false) VehicleType vehicleType
+    public List<Vehicle> search(
+            @RequestParam String city,
+            @RequestParam(required = false) FuelType fuelType,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) VehicleType vehicleType
 
-) {
+    ) {
 
-    return vehicleRepository.findAll((root, query, cb) -> {
+        return vehicleRepository.findAll((root, query, cb) -> {
 
-        List<Predicate> predicates = new ArrayList<>();
+            List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(cb.equal(
-                cb.lower(root.get("city")),
-                city.toLowerCase()
-        ));
+            predicates.add(cb.equal(
+                    cb.lower(root.get("city")),
+                    city.toLowerCase()));
 
-        if (fuelType != null) {
-            predicates.add(cb.equal(root.get("fuelType"), fuelType));
-        }
+            if (fuelType != null) {
+                predicates.add(cb.equal(root.get("fuelType"), fuelType));
+            }
 
-        if (minPrice != null) {
-            predicates.add(cb.greaterThanOrEqualTo(
-                    root.get("pricePerDay"), minPrice));
-        }
+            if (minPrice != null) {
+                predicates.add(cb.greaterThanOrEqualTo(
+                        root.get("pricePerDay"), minPrice));
+            }
 
-        if (maxPrice != null) {
-            predicates.add(cb.lessThanOrEqualTo(
-                    root.get("pricePerDay"), maxPrice));
-        }
-        if (vehicleType != null) {
-            predicates.add(cb.equal(root.get("vehicleType"), vehicleType));
-        }
+            if (maxPrice != null) {
+                predicates.add(cb.lessThanOrEqualTo(
+                        root.get("pricePerDay"), maxPrice));
+            }
+            if (vehicleType != null) {
+                predicates.add(cb.equal(root.get("vehicleType"), vehicleType));
+            }
 
-
-        return cb.and(predicates.toArray(new Predicate[0]));
-    });
-}
-
-@PostMapping
-public Vehicle addVehicle(@RequestBody Vehicle vehicle) {
-
-    User seller = null;
-    try {
-        seller = userRepository.findByEmail("rahul@gmail.com")
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    } catch (Exception e) {
-        e.printStackTrace();
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
     }
 
-    vehicle.setSeller(seller);
+    @PostMapping
+    public Vehicle addVehicle(@RequestBody Vehicle vehicle) {
 
-    return vehicleRepository.save(vehicle);
-}
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-@GetMapping("/seller/{sellerId}")
-public List<Vehicle> getSellerVehicles(@PathVariable UUID sellerId) {
-    return vehicleRepository.findBySellerId(sellerId);
-}
+        vehicle.setSeller(user);
 
-@DeleteMapping("/{id}")
-public void deleteVehicle(@PathVariable UUID id) {
-    vehicleRepository.deleteById(id);
-}
+        return vehicleRepository.save(vehicle);
+    }
 
-@PutMapping("/{id}")
-public Vehicle updateVehicle(@PathVariable UUID id, @RequestBody Vehicle updated) {
+    @GetMapping("/my-listings")
+    public List<Vehicle> getMyListings() {
 
-    Vehicle vehicle = vehicleRepository.findById(id)
-            .orElseThrow();
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-    vehicle.setTitle(updated.getTitle());
-    vehicle.setDescription(updated.getDescription());
-    vehicle.setFuelType(updated.getFuelType());
-    vehicle.setType(updated.getType());
-    vehicle.setEngineCc(updated.getEngineCc());
-    vehicle.setCity(updated.getCity());
-    vehicle.setPricePerDay(updated.getPricePerDay());
+        return vehicleRepository.findBySellerId(user.getId());
+    }
 
-    return vehicleRepository.save(vehicle);
-}
+    @DeleteMapping("/{id}")
+    public void deleteVehicle(@PathVariable UUID id) {
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow();
+        if (!vehicle.getSeller().getId().equals(user.getId())) {
+            throw new RuntimeException("Not authorized");
+        }
 
+        vehicleRepository.deleteById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Vehicle updateVehicle(@PathVariable UUID id, @RequestBody Vehicle updated) {
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow();
+        if (!vehicle.getSeller().getId().equals(user.getId())) {
+            throw new RuntimeException("Not authorized");
+        }
+
+        vehicle.setTitle(updated.getTitle());
+        vehicle.setDescription(updated.getDescription());
+        vehicle.setFuelType(updated.getFuelType());
+        vehicle.setType(updated.getType());
+        vehicle.setEngineCc(updated.getEngineCc());
+        vehicle.setCity(updated.getCity());
+        vehicle.setPricePerDay(updated.getPricePerDay());
+
+        return vehicleRepository.save(vehicle);
+    }
 
 }

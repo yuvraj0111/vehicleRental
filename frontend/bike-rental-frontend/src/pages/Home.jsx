@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import FilterBar from "../components/FilterBar";
 import BikeCard from "../components/BikeCard";
 import { searchVehicles } from "../services/api";
+import BookingModal from "../components/BookingModal";
 
 function Home() {
   const [bikes, setBikes] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
  const handleSearch = async (city, fuelType, minPrice, maxPrice) => {
   try {
@@ -22,8 +24,19 @@ function Home() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {bikes.map((bike) => (
-          <BikeCard key={bike.id} bike={bike} />
+          <BikeCard
+            key={bike.id}
+            bike={bike}
+            onBook={setSelectedVehicle}
+          />
+
         ))}
+        {selectedVehicle && (
+        <BookingModal
+          vehicle={selectedVehicle}
+          onClose={() => setSelectedVehicle(null)}
+        />
+      )}
       </div>
     </>
   );

@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
-const SELLER_ID = "b21fd49f-4379-48ba-afd8-7952d36e71fe";
 
 function MyListings() {
   const [vehicles, setVehicles] = useState([]);
   const [editingVehicle, setEditingVehicle] = useState(null);
 
   const fetchVehicles = async () => {
-    const res = await axios.get(
-      `http://localhost:8080/api/vehicles/seller/${SELLER_ID}`
+    const res = await api.get(
+      `/api/vehicles/my-listings`
     );
     setVehicles(res.data);
   };
@@ -19,7 +18,7 @@ function MyListings() {
   }, []);
 
   const deleteVehicle = async (id) => {
-    await axios.delete(`http://localhost:8080/api/vehicles/${id}`);
+    await api.delete(`/api/vehicles/${id}`);
     fetchVehicles();
   };
 
@@ -31,8 +30,8 @@ function MyListings() {
   };
 
   const saveEdit = async () => {
-    await axios.put(
-      `http://localhost:8080/api/vehicles/${editingVehicle.id}`,
+    await api.put(
+      `/api/vehicles/${editingVehicle.id}`,
       {
         ...editingVehicle,
         pricePerDay: Number(editingVehicle.pricePerDay),

@@ -34,5 +34,7 @@ public class Vehicle {
     private VehicleType type;
 
     private Integer engineCc;
+    private Double monthlyPrice;
+
 
 }

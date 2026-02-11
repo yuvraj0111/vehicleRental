@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 @Entity
 @Getter @Setter
@@ -15,16 +16,20 @@ public class Booking {
     private UUID id;
 
     @ManyToOne
-    private User user;
+    private User buyer;
 
     @ManyToOne
     private Vehicle vehicle;
 
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDate fromDate;
+    private LocalDate toDate;
+
+    private Boolean monthlyBooking;  // true if monthly
 
     private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
+
+    private LocalDateTime createdAt;
 }

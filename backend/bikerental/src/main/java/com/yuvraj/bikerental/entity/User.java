@@ -2,6 +2,8 @@ package com.yuvraj.bikerental.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -25,5 +27,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String city;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
 }

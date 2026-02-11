@@ -1,6 +1,5 @@
-import React from "react";
 
-function BikeCard({ bike }) {
+function BikeCard({ bike, onBook }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 cursor-pointer">
 
@@ -17,6 +16,13 @@ function BikeCard({ bike }) {
           ₹{bike.pricePerDay}
           <span className="text-sm text-gray-500 font-normal"> / day</span>
         </p>
+        <button
+          className="mt-4 w-full bg-primary text-white py-2 rounded-xl hover:opacity-90 transition"
+          onClick={() => onBook(bike)}
+        >
+          Request Booking
+        </button>
+
       </div>
     </div>
   );
