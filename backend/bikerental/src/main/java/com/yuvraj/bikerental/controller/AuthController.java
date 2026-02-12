@@ -23,15 +23,18 @@ public class AuthController {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody User request) {
 
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Email already exists");
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
 
-        user.setPassword(encoder.encode(user.getPassword()));
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(encoder.encode(request.getPassword()));
+
+        // Force roles
         user.setRoles(Set.of(Role.BUYER, Role.SELLER));
 
         userRepository.save(user);

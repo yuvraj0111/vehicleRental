@@ -3,6 +3,8 @@ package com.yuvraj.bikerental.controller;
 import com.yuvraj.bikerental.dto.BookingRequestDto;
 import com.yuvraj.bikerental.entity.*;
 import com.yuvraj.bikerental.repository.*;
+import com.yuvraj.bikerental.service.NotificationService;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,16 +23,16 @@ public class BookingController {
 
     private final BookingRepository bookingRepository;
     private final VehicleRepository vehicleRepository;
-    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @PreAuthorize("hasRole('BUYER')")
     @PostMapping("/request")
     public Booking requestBooking(@RequestBody BookingRequestDto dto) {
+        User buyer = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow();
-
-        User buyer = userRepository.findById(dto.getBuyerId())
                 .orElseThrow();
 
         long days = ChronoUnit.DAYS.between(dto.getFromDate(), dto.getToDate());
@@ -55,27 +57,41 @@ public class BookingController {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return bookingRepository.save(booking);
+        bookingRepository.save(booking);
+
+        // 🔔 Notify Seller
+        notificationService.createNotification(
+                vehicle.getSeller(),
+                "New booking request for " + vehicle.getTitle() +
+                        " (" + dto.getFromDate() + " to " + dto.getToDate() + ")");
+
+        return booking;
     }
 
     @PreAuthorize("hasRole('SELLER')")
     @PutMapping("/{id}/approve")
     public Booking approveBooking(@PathVariable UUID id) {
 
-        User user = (User) SecurityContextHolder.getContext()
+        User seller = (User) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
 
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow();
 
-        if (!booking.getVehicle().getSeller().getId().equals(user.getId())) {
-            throw new RuntimeException("You are not the owner of this vehicle");
+        if (!booking.getVehicle().getSeller().getId().equals(seller.getId())) {
+            throw new RuntimeException("Not authorized");
         }
 
         booking.setStatus(BookingStatus.APPROVED);
 
-        return bookingRepository.save(booking);
+        bookingRepository.save(booking);
+
+        notificationService.createNotification(
+                booking.getBuyer(),
+                "Your booking for " + booking.getVehicle().getTitle() + " was approved.");
+
+        return booking;
     }
 
     @PreAuthorize("hasRole('SELLER')")
@@ -93,7 +109,9 @@ public class BookingController {
         }
 
         booking.setStatus(BookingStatus.REJECTED);
-
+        notificationService.createNotification(
+                booking.getBuyer(),
+                "Your booking for " + booking.getVehicle().getTitle() + " was rejected.");
         return bookingRepository.save(booking);
     }
 

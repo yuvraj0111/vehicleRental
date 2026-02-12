@@ -37,7 +37,6 @@ function Login() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          F
           className="w-full border p-3 rounded-xl bg-white text-gray-900 dark:bg-gray-800 dark:text-white"
         />
 

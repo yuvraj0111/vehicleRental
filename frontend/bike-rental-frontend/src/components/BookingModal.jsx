@@ -1,31 +1,32 @@
 import { useState } from "react";
 import api from "../api/axios";
 
-
 function BookingModal({ vehicle, onClose }) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [monthly, setMonthly] = useState(false);
 
   const handleSubmit = async () => {
-    await api.post("/api/bookings/request", {
-      vehicleId: vehicle.id,
-      buyerId: "80d47601-aced-490b-b8b1-48d25ab482b5", // temporary until auth
-      fromDate,
-      toDate,
-      monthlyBooking: monthly
-    });
+    try {
+      await api.post("/api/bookings/request", {
+        vehicleId: vehicle.id,
+        fromDate,
+        toDate,
+        monthly,
+      });
 
-    onClose();
+      alert("Booking request sent!");
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send booking request");
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl w-96 space-y-4">
-
-        <h3 className="text-lg font-semibold">
-          Book {vehicle.title}
-        </h3>
+        <h3 className="text-lg font-semibold">Book {vehicle.title}</h3>
 
         <input
           type="date"
@@ -58,14 +59,10 @@ function BookingModal({ vehicle, onClose }) {
             Request Booking
           </button>
 
-          <button
-            onClick={onClose}
-            className="flex-1 border rounded-xl py-2"
-          >
+          <button onClick={onClose} className="flex-1 border rounded-xl py-2">
             Cancel
           </button>
         </div>
-
       </div>
     </div>
   );

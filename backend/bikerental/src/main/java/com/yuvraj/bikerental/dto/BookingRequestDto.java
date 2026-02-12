@@ -11,7 +11,6 @@ import java.util.UUID;
 public class BookingRequestDto {
 
     private UUID vehicleId;
-    private UUID buyerId;
     private LocalDate fromDate;
     private LocalDate toDate;
     private Boolean monthlyBooking;

@@ -21,7 +21,6 @@ import com.yuvraj.bikerental.entity.FuelType;
 import com.yuvraj.bikerental.entity.User;
 import com.yuvraj.bikerental.entity.Vehicle;
 import com.yuvraj.bikerental.entity.VehicleType;
-import com.yuvraj.bikerental.repository.UserRepository;
 import com.yuvraj.bikerental.repository.VehicleRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class VehicleController {
 
     private final VehicleRepository vehicleRepository;
-    private final UserRepository userRepository;
-
     @GetMapping("/search")
     public List<Vehicle> search(
             @RequestParam String city,

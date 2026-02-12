@@ -13,8 +13,7 @@ function FilterBar({ onSearch }) {
   };
 
   return (
-<div className="mt-10 mb-8">
-
+    <div className="mt-10 mb-8">
       <input
         className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary transition"
         placeholder="City"
@@ -44,7 +43,6 @@ function FilterBar({ onSearch }) {
       <input
         type="number"
         className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary transition"
-
         placeholder="Max ₹"
         value={maxPrice}
         onChange={(e) => setMaxPrice(e.target.value)}
@@ -52,13 +50,19 @@ function FilterBar({ onSearch }) {
 
       <button
         onClick={handleSearch}
-        className="bg-primary text-white px-6 py-3 rounded-xl hover:opacity-90 transition font-medium"
+        className="
+          bg-black text-white
+          dark:bg-white dark:text-black
+          px-6 py-3 rounded-xl
+          font-semibold
+          shadow-md hover:shadow-lg
+          transition duration-200
+        "
       >
         Search
       </button>
     </div>
   );
 }
-
 
 export default FilterBar;

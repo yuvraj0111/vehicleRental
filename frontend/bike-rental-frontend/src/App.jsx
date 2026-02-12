@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -26,12 +27,10 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
-      
       {user && <Navbar />}
 
       <div className="max-w-7xl mx-auto px-6">
         <Routes>
-
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -81,7 +80,14 @@ function MainApp() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
     </div>
