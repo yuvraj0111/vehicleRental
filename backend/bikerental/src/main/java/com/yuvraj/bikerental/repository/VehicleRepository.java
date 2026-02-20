@@ -5,12 +5,19 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 import com.yuvraj.bikerental.entity.Vehicle;
 
-public interface VehicleRepository 
-    extends JpaRepository<Vehicle, UUID>, 
-            JpaSpecificationExecutor<Vehicle> {
+public interface VehicleRepository
+        extends JpaRepository<Vehicle, UUID>,
+        JpaSpecificationExecutor<Vehicle> {
     List<Vehicle> findBySellerId(UUID sellerId);
 
+    @Query("""
+                SELECT DISTINCT v.city
+                FROM Vehicle v
+                WHERE LOWER(v.city) LIKE LOWER(CONCAT(:prefix, '%'))
+            """)
+    List<String> findCitySuggestions(String prefix);
 }

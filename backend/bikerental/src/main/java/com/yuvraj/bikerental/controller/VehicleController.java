@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import jakarta.persistence.criteria.Predicate;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class VehicleController {
 
     private final VehicleRepository vehicleRepository;
+
     @GetMapping("/search")
     public List<Vehicle> search(
             @RequestParam String city,
@@ -126,6 +128,12 @@ public class VehicleController {
         vehicle.setPricePerDay(updated.getPricePerDay());
 
         return vehicleRepository.save(vehicle);
+    }
+
+    @PreAuthorize("hasAnyRole('BUYER','SELLER')")
+    @GetMapping("/cities")
+    public List<String> getCitySuggestions(@RequestParam String prefix) {
+        return vehicleRepository.findCitySuggestions(prefix);
     }
 
 }

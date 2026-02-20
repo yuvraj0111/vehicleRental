@@ -5,19 +5,12 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
-  // Do NOT attach token to auth endpoints
   if (token && !config.url.includes("/api/auth")) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
-
-
-  return config;
-});
-
 export default api;
