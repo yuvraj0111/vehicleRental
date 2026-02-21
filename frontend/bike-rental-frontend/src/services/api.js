@@ -8,3 +8,7 @@ export const searchVehicles = (city, fuelType, minPrice, maxPrice) => {
 
   return api.get(url);
 };
+
+export const updateAvailability = (vehicleId, available) => {
+  return API.put(`/vehicles/${vehicleId}/availability?available=${available}`);
+};

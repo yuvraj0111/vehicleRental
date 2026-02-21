@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 
-
 function MyListings() {
   const [vehicles, setVehicles] = useState([]);
   const [editingVehicle, setEditingVehicle] = useState(null);
@@ -22,6 +21,20 @@ function MyListings() {
     fetchVehicles();
   };
 
+  const updateAvailability = async (id, available) => {
+    try {
+      await api.put(`/api/vehicles/${id}/availability?available=${available}`);
+
+      setVehicles((prev) =>
+        prev.map((v) =>
+          v.id === id ? { ...v, isAvailable: available } : v
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleEditChange = (e) => {
     setEditingVehicle({
       ...editingVehicle,
@@ -33,11 +46,11 @@ function MyListings() {
     await api.put(
       `/api/vehicles/${editingVehicle.id}`,
       {
-        ...editingVehicle,
-        pricePerDay: Number(editingVehicle.pricePerDay),
-        engineCc: editingVehicle.engineCc
-          ? Number(editingVehicle.engineCc)
-          : null
+      ...editingVehicle,
+      pricePerDay: Number(editingVehicle.pricePerDay),
+      engineCc: editingVehicle.engineCc
+        ? Number(editingVehicle.engineCc)
+        : null
       }
     );
 
@@ -50,10 +63,49 @@ function MyListings() {
       <h2>My Listings</h2>
 
       {vehicles.map((v) => (
-        <div key={v.id} style={styles.card}>
+        <div
+          key={v.id}
+          style={{
+            ...styles.card,
+            opacity: v.isAvailable ? 1 : 0.5
+          }}
+        >
           <h3>{v.title}</h3>
           <p>{v.type} | {v.fuelType}</p>
           <p>₹{v.pricePerDay}</p>
+
+          {/* Availability Toggle */}
+          <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span>{v.isAvailable ? "Available" : "Unavailable"}</span>
+
+              <div
+                style={{
+                  width: "50px",
+                  height: "24px",
+                  backgroundColor: v.isAvailable ? "#4caf50" : "#ccc",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "2px",
+                  transition: "background-color 0.3s"
+                }}
+                onClick={() => updateAvailability(v.id, !v.isAvailable)}
+              >
+                <div
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    backgroundColor: "white",
+                    borderRadius: "50%",
+                    marginLeft: v.isAvailable ? "26px" : "0px",
+                    transition: "margin-left 0.3s"
+                  }}
+                />
+              </div>
+            </label>
+          </div>
 
           <button onClick={() => setEditingVehicle(v)}>Edit</button>
           <button onClick={() => deleteVehicle(v.id)}>Delete</button>

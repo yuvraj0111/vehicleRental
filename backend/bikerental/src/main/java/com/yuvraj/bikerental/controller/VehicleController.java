@@ -65,8 +65,9 @@ public class VehicleController {
                         root.get("pricePerDay"), maxPrice));
             }
             if (vehicleType != null) {
-                predicates.add(cb.equal(root.get("vehicleType"), vehicleType));
+                predicates.add(cb.equal(root.get("type"), vehicleType));
             }
+            predicates.add(cb.isTrue(root.get("isAvailable")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         });
@@ -136,4 +137,23 @@ public class VehicleController {
         return vehicleRepository.findCitySuggestions(prefix);
     }
 
+    @PreAuthorize("hasRole('SELLER')")
+    @PutMapping("/{id}/availability")
+    public Vehicle updateAvailability(@PathVariable UUID id, @RequestParam boolean available) {
+
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow();
+
+        if (!vehicle.getSeller().getId().equals(user.getId())) {
+            throw new RuntimeException("Not authorized");
+        }
+
+        vehicle.setIsAvailable(available);
+
+        return vehicleRepository.save(vehicle);
+    }
 }
